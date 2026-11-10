@@ -66,12 +66,16 @@
 
     .loc { font-size: 12px; color: #94a3b8; margin-top: 10px; min-height: 16px; }
     .loc.warn { color: #fbbf24; }
+    .homeinfo { font-size: 12px; color: #c4b5fd; margin-top: 6px; min-height: 16px; }
 
-    textarea {
-      display: none; width: 100%; margin-top: 14px; padding: 12px 14px; border-radius: 14px; resize: none; font-family: inherit;
+    textarea, select {
+      display: none; width: 100%; margin-top: 14px; padding: 12px 14px; border-radius: 14px; font-family: inherit;
       border: 1px solid rgba(255,255,255,.18); background: rgba(15,23,42,.6); color: #f1f5f9; font-size: 16px; outline: none;
     }
-    textarea:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,.25); }
+    textarea { resize: none; }
+    select { margin-top: 10px; }
+    select option { color: #0f172a; }
+    textarea:focus, select:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,.25); }
     .hint { font-size: 12px; color: #fbbf24; margin-top: 8px; display: none; }
 
     .btns { margin-top: 18px; display: grid; gap: 10px; }
@@ -79,8 +83,10 @@
       width: 100%; padding: 15px; font-size: 16px; font-weight: 700; color: #fff; border: 0; border-radius: 16px; cursor: pointer;
       transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease; letter-spacing: .3px; font-family: inherit;
     }
-    #in  { background: linear-gradient(135deg, #22c55e, #14b8a6); box-shadow: 0 10px 28px rgba(34,197,94,.35); }
-    #out { background: linear-gradient(135deg, #f43f5e, #f97316); box-shadow: 0 10px 28px rgba(244,63,94,.35); }
+    #in   { background: linear-gradient(135deg, #22c55e, #14b8a6); box-shadow: 0 10px 28px rgba(34,197,94,.35); }
+    #out  { background: linear-gradient(135deg, #f43f5e, #f97316); box-shadow: 0 10px 28px rgba(244,63,94,.35); }
+    #hin  { background: linear-gradient(135deg, #8b5cf6, #6366f1); box-shadow: 0 10px 28px rgba(99,102,241,.35); }
+    #hout { background: linear-gradient(135deg, #a855f7, #ec4899); box-shadow: 0 10px 28px rgba(168,85,247,.35); }
     button:hover:not(:disabled) { transform: translateY(-2px); }
     button:active:not(:disabled) { transform: scale(.98); }
     button:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
@@ -148,13 +154,17 @@
       </div>
 
       <div class="loc" id="loc"></div>
+      <div class="homeinfo" id="homeinfo"></div>
 
       <textarea id="note" rows="3" placeholder="Working past your shift? Add a short note on what you worked on."></textarea>
+      <select id="client"></select>
       <div class="hint" id="hint">You are past shift end. A note is required to log out.</div>
 
       <div class="btns">
         <button id="in" disabled>Start my day</button>
         <button id="out" disabled>End my day</button>
+        <button id="hin" hidden>Start home work</button>
+        <button id="hout" hidden>End home work</button>
       </div>
 
       <div class="msg" id="msg"></div>
@@ -169,12 +179,15 @@
 
 <script>
   // ---- Fill the Client ID in (see SETUP.md). API_URL is your public /exec link. ----
-    var CONFIG = {
+  var CONFIG = {
     API_URL: 'https://script.google.com/macros/s/AKfycbyIUWA_E84pCyujuLkPAuid44q_NcWYdTdnmVntrd5M_ehhbylmuGBsURsMhWdWnBU/exec',
     CLIENT_ID: '356672302362-ldqsm3h35ellqotc976ms9sacbjmt3se.apps.googleusercontent.com'
   };
 
-  var SHIFT_HOURS = 9, SHIFT_END_MIN = 19 * 60 + 30, C = 527.8;
+  // Change this value every time you update this file. Open apps check it and reload themselves when it changes.
+  var APP_VERSION = '2026-11-10-1';
+
+  var SHIFT_HOURS = 9, SHIFT_END_MIN = 19 * 60 + 30, C = 527.8, NOTE_MIN = 15;
   var KEY_SESSION = 'snoball_att_session';
   var quotes = [
     'Small steps every day add up to big launches.',
@@ -303,20 +316,55 @@
     $('hint').style.display = (state.state === 'in' && mins > SHIFT_END_MIN) ? 'block' : 'none';
   }
 
+  // Fills the client dropdown. It is rebuilt only when the list from the sheet changes, so a selection is kept.
+  function fillClients(list, show) {
+    var sel = $('client');
+    sel.style.display = show ? 'block' : 'none';
+    if (!show) return;
+    var sig = (list || []).join('|');
+    if (sel.getAttribute('data-sig') === sig) return;
+    var keep = sel.value;
+    sel.innerHTML = '';
+    var first = document.createElement('option');
+    first.value = ''; first.textContent = 'Select client or project';
+    sel.appendChild(first);
+    (list || []).forEach(function (c) {
+      var o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      sel.appendChild(o);
+    });
+    if (keep) sel.value = keep;
+    if (sel.selectedIndex < 0) sel.selectedIndex = 0;
+    sel.setAttribute('data-sig', sig);
+  }
+
   function render(s) {
     state = s;
+    var h = s.home || { enabled: false, open: false, canStart: false };
+    var homeOpen = !!h.open;
+
     greet(s.name);
     $('li').textContent = s.login || '-';
     $('lo').textContent = s.logout || '-';
     $('hr').textContent = s.hoursText || '-';
-    $('in').disabled = busy || s.state !== 'none';
+    $('in').disabled = busy || s.state !== 'none' || homeOpen;
     $('out').disabled = busy || s.state !== 'in';
-    $('note').style.display = s.state === 'in' ? 'block' : 'none';
+    $('hin').hidden = !(h.enabled && !homeOpen && h.canStart);
+    $('hin').disabled = busy;
+    $('hout').hidden = !homeOpen;
+    $('hout').disabled = busy;
+
+    $('note').style.display = (s.state === 'in' || homeOpen) ? 'block' : 'none';
+    $('note').placeholder = homeOpen
+      ? 'What did you work on from home? (required)'
+      : 'Working past your shift? Add a short note on what you worked on.';
+    fillClients(h.clients, homeOpen);
 
     var st = $('status');
     if (s.state === 'none') { st.textContent = 'Not logged in'; st.className = 'pill'; }
     if (s.state === 'in')   { st.textContent = 'Working'; st.className = 'pill working'; }
     if (s.state === 'done') { st.textContent = 'Done for the day'; st.className = 'pill done'; }
+    if (homeOpen)           { st.textContent = 'Working from home'; st.className = 'pill wfh'; }
     $('ringwrap').className = 'ringwrap ' + (s.state === 'in' ? 'working' : '');
 
     var wfh = new Date().getDay() === 6;
@@ -332,7 +380,12 @@
     loc.textContent = parts.join('  |  ');
     loc.className = 'loc' + (/not shared|unavailable|Outside|low accuracy/i.test(parts.join(' ')) ? ' warn' : '');
 
-    setMsg(s.flags ? s.flags : (s.state === 'done' ? 'Nice work today!' : ''), false);
+    var hi = [];
+    if (homeOpen) hi.push('Home session running since ' + h.since);
+    if (h.todayText) hi.push('Home work today: ' + h.todayText);
+    $('homeinfo').textContent = hi.join('  |  ');
+
+    setMsg(s.flags ? s.flags : (s.state === 'done' && !homeOpen ? 'Nice work today!' : ''), false);
     $('quote').textContent = quotes[new Date().getDate() % quotes.length];
     tick();
   }
@@ -349,10 +402,15 @@
     });
   }
 
+  // action is one of: login, logout, homeStart, homeEnd
   function act(action) {
     if (busy) return;
+    if (action === 'homeEnd') {
+      if (!$('client').value) { setMsg('Pick the client or project you worked on.', true); return; }
+      if ($('note').value.trim().length < NOTE_MIN) { setMsg('Add a short note (at least ' + NOTE_MIN + ' characters) on what you worked on.', true); return; }
+    }
     busy = true;
-    $('in').disabled = true; $('out').disabled = true;
+    ['in', 'out', 'hin', 'hout'].forEach(function (id) { $(id).disabled = true; });
     setMsg('Getting your location...', false);
     var session = load(KEY_SESSION);
     var geoStatus = 'ok';
@@ -361,11 +419,13 @@
       geoStatus = geo.status;
       setMsg('Saving...', false);
       var payload = { session: session, geo: geo };
-      if (action === 'logout') payload.note = $('note').value;
+      if (action === 'logout' || action === 'homeEnd') payload.note = $('note').value;
+      if (action === 'homeEnd') payload.client = $('client').value;
       return api(action, payload);
     }).then(function (s) {
       busy = false;
-      if (action === 'logout') $('note').value = '';
+      if (action === 'logout' || action === 'homeEnd') $('note').value = '';
+      if (action === 'homeEnd') $('client').selectedIndex = 0;
       render(s);
       if (geoStatus !== 'ok') setMsg('Saved, but your location was not shared. Allow location for this app in your phone settings.', true);
     }).catch(function (e) {
@@ -397,12 +457,32 @@
     if (ios && !standalone) $('iosTip').hidden = false;
   })();
 
+  // ---------- Auto update ----------
+  // When the app comes back to the screen, compare the live APP_VERSION with this one and reload if it changed.
+  var lastVersionCheck = 0;
+  function checkForUpdate() {
+    var now = Date.now();
+    if (busy || now - lastVersionCheck < 60000) return;
+    lastVersionCheck = now;
+    fetch('index.html?v=' + now, { cache: 'no-store' })
+      .then(function (r) { return r.text(); })
+      .then(function (html) {
+        var m = /var APP_VERSION = '([^']+)'/.exec(html);
+        if (m && m[1] !== APP_VERSION && !busy) location.reload();
+      })
+      .catch(function () {});
+  }
+
   // ---------- Wire up ----------
   $('in').addEventListener('click', function () { act('login'); });
   $('out').addEventListener('click', function () { act('logout'); });
+  $('hin').addEventListener('click', function () { act('homeStart'); });
+  $('hout').addEventListener('click', function () { act('homeEnd'); });
   $('signout').addEventListener('click', function () { signOut(); });
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden && signedIn && !busy && load(KEY_SESSION)) loadState();
+    if (document.hidden) return;
+    checkForUpdate();
+    if (signedIn && !busy && load(KEY_SESSION)) loadState();
   });
   setInterval(tick, 1000);
 
