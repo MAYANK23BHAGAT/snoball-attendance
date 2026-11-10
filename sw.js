@@ -1,4 +1,4 @@
-const CACHE = 'snoball-att-v1';
+const CACHE = 'snoball-att-v2';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', function (e) {
@@ -15,12 +15,13 @@ self.addEventListener('activate', function (e) {
 
 // Network first so updates show up right away, cache only as an offline fallback.
 // Calls to the Apps Script API are cross origin and are never touched here.
+// Requests with a query string (the version check) skip the cache entirely.
 self.addEventListener('fetch', function (e) {
   const r = e.request;
   const u = new URL(r.url);
-  if (r.method !== 'GET' || u.origin !== location.origin) return;
+  if (r.method !== 'GET' || u.origin !== location.origin || u.search) return;
   e.respondWith(
-    fetch(r).then(function (res) {
+    fetch(r, { cache: 'no-cache' }).then(function (res) {
       const copy = res.clone();
       caches.open(CACHE).then(function (c) { c.put(r, copy); });
       return res;
