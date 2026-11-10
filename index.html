@@ -66,16 +66,37 @@
 
     .loc { font-size: 12px; color: #94a3b8; margin-top: 10px; min-height: 16px; }
     .loc.warn { color: #fbbf24; }
-    .homeinfo { font-size: 12px; color: #c4b5fd; margin-top: 6px; min-height: 16px; }
 
-    textarea, select {
+    textarea {
       display: none; width: 100%; margin-top: 14px; padding: 12px 14px; border-radius: 14px; font-family: inherit;
-      border: 1px solid rgba(255,255,255,.18); background: rgba(15,23,42,.6); color: #f1f5f9; font-size: 16px; outline: none;
+      border: 1px solid rgba(255,255,255,.18); background: rgba(15,23,42,.6); color: #f1f5f9; font-size: 16px; outline: none; resize: none;
     }
-    textarea { resize: none; }
-    select { margin-top: 10px; }
-    select option { color: #0f172a; }
-    textarea:focus, select:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,.25); }
+    textarea:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,.25); }
+
+    /* ---- WFH panel ---- */
+    .home { margin-top: 20px; padding: 18px 16px 16px; text-align: left; border-radius: 22px;
+            background: linear-gradient(160deg, rgba(139,92,246,.22), rgba(236,72,153,.10));
+            border: 1px solid rgba(196,181,253,.28); }
+    .home.running { border-color: rgba(244,114,182,.55); box-shadow: 0 0 0 3px rgba(244,114,182,.12); }
+    .home-head { display: flex; align-items: center; gap: 12px; }
+    .home-ico { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,.12); display: flex;
+                align-items: center; justify-content: center; font-size: 20px; flex: none; }
+    .home-title { font-size: 16px; font-weight: 700; }
+    .home-sub { font-size: 12px; color: #c4b5fd; margin-top: 2px; line-height: 1.4; }
+    .htimer { font-size: 44px; font-weight: 300; text-align: center; margin: 16px 0 2px; letter-spacing: 1px;
+              font-variant-numeric: tabular-nums; background: linear-gradient(90deg, #c4b5fd, #f9a8d4);
+              -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .htimer-sub { text-align: center; font-size: 12px; color: #94a3b8; }
+    .hlabel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #a5b4fc; margin: 18px 0 8px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { width: auto; padding: 9px 14px; font-size: 14px; font-weight: 600; border-radius: 999px; letter-spacing: 0;
+            background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); color: #e2e8f0; box-shadow: none; }
+    .chip.on { background: linear-gradient(135deg, #8b5cf6, #ec4899); border-color: transparent; color: #fff; }
+    .chips .none { font-size: 13px; color: #fbbf24; }
+    .home textarea { margin-top: 0; }
+    .counter { font-size: 12px; color: #94a3b8; margin-top: 6px; text-align: right; }
+    .counter.ok { color: #86efac; }
+    .home button.act { margin-top: 16px; }
     .hint { font-size: 12px; color: #fbbf24; margin-top: 8px; display: none; }
 
     .btns { margin-top: 18px; display: grid; gap: 10px; }
@@ -87,6 +108,7 @@
     #out  { background: linear-gradient(135deg, #f43f5e, #f97316); box-shadow: 0 10px 28px rgba(244,63,94,.35); }
     #hin  { background: linear-gradient(135deg, #8b5cf6, #6366f1); box-shadow: 0 10px 28px rgba(99,102,241,.35); }
     #hout { background: linear-gradient(135deg, #a855f7, #ec4899); box-shadow: 0 10px 28px rgba(168,85,247,.35); }
+    .chip:hover:not(:disabled) { transform: none; }
     button:hover:not(:disabled) { transform: translateY(-2px); }
     button:active:not(:disabled) { transform: scale(.98); }
     button:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
@@ -131,40 +153,63 @@
         <span class="pill" id="mode" style="display:none"></span>
       </div>
 
-      <div class="ringwrap" id="ringwrap">
-        <svg width="210" height="210" viewBox="0 0 210 210">
-          <defs>
-            <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/>
-            </linearGradient>
-          </defs>
-          <circle class="track" cx="105" cy="105" r="84"/>
-          <circle class="bar" id="bar" cx="105" cy="105" r="84"/>
-        </svg>
-        <div class="ringtext">
-          <div class="big" id="elapsed">0:00</div>
-          <div class="small" id="ringsub">of 9h shift</div>
+      <div id="officeView">
+        <div class="ringwrap" id="ringwrap">
+          <svg width="210" height="210" viewBox="0 0 210 210">
+            <defs>
+              <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/>
+              </linearGradient>
+            </defs>
+            <circle class="track" cx="105" cy="105" r="84"/>
+            <circle class="bar" id="bar" cx="105" cy="105" r="84"/>
+          </svg>
+          <div class="ringtext">
+            <div class="big" id="elapsed">0:00</div>
+            <div class="small" id="ringsub">of 9h shift</div>
+          </div>
+        </div>
+
+        <div class="tiles">
+          <div class="tile"><div class="k">Login</div><div class="v" id="li">-</div></div>
+          <div class="tile"><div class="k">Logout</div><div class="v" id="lo">-</div></div>
+          <div class="tile"><div class="k">Hours</div><div class="v" id="hr">-</div></div>
+        </div>
+
+        <div class="loc" id="loc"></div>
+
+        <textarea id="note" rows="3" placeholder="Working past your shift? Add a short note on what you worked on."></textarea>
+        <div class="hint" id="hint">You are past shift end. A note is required to log out.</div>
+
+        <div class="btns">
+          <button id="in" disabled>Start my day</button>
+          <button id="out" disabled>End my day</button>
         </div>
       </div>
 
-      <div class="tiles">
-        <div class="tile"><div class="k">Login</div><div class="v" id="li">-</div></div>
-        <div class="tile"><div class="k">Logout</div><div class="v" id="lo">-</div></div>
-        <div class="tile"><div class="k">Hours</div><div class="v" id="hr">-</div></div>
-      </div>
+      <div class="home" id="home" hidden>
+        <div class="home-head">
+          <div class="home-ico">🏠</div>
+          <div>
+            <div class="home-title" id="homeTitle">Work from home</div>
+            <div class="home-sub" id="homeSub"></div>
+          </div>
+        </div>
 
-      <div class="loc" id="loc"></div>
-      <div class="homeinfo" id="homeinfo"></div>
+        <div id="homeRun" hidden>
+          <div class="htimer" id="htimer">0:00</div>
+          <div class="htimer-sub" id="htimerSub"></div>
 
-      <textarea id="note" rows="3" placeholder="Working past your shift? Add a short note on what you worked on."></textarea>
-      <select id="client"></select>
-      <div class="hint" id="hint">You are past shift end. A note is required to log out.</div>
+          <div class="hlabel">1. Who got your time?</div>
+          <div class="chips" id="chips"></div>
 
-      <div class="btns">
-        <button id="in" disabled>Start my day</button>
-        <button id="out" disabled>End my day</button>
-        <button id="hin" hidden>Start home work</button>
-        <button id="hout" hidden>End home work</button>
+          <div class="hlabel">2. What did you get done?</div>
+          <textarea id="hnote" rows="3" placeholder="Example: Finalised the costing sheet and shared it with the manager."></textarea>
+          <div class="counter" id="hcount"></div>
+        </div>
+
+        <button id="hin" class="act" hidden>Start WFH session</button>
+        <button id="hout" class="act" hidden disabled>Finish WFH session</button>
       </div>
 
       <div class="msg" id="msg"></div>
@@ -185,7 +230,7 @@
   };
 
   // Change this value every time you update this file. Open apps check it and reload themselves when it changes.
-  var APP_VERSION = '2026-11-10-1';
+  var APP_VERSION = '2026-11-10-3';
 
   var SHIFT_HOURS = 9, SHIFT_END_MIN = 19 * 60 + 30, C = 527.8, NOTE_MIN = 15;
   var KEY_SESSION = 'snoball_att_session';
@@ -200,6 +245,7 @@
     'The fool who knows how to move a mountain will always hire a genius who only knows its weight.'
   ];
   var state = { state: 'none', login: '', logout: '', hours: '' };
+  var pickedClient = '', homeSince = null;
   var busy = false, signedIn = false, deferredInstall = null;
 
   function $(id) { return document.getElementById(id); }
@@ -273,7 +319,7 @@
 
   // ---------- Screen ----------
   function parseTime(str) {
-    var m = /(\d+):(\d+)\s*(AM|PM)/i.exec(str || '');
+    var m = /(\d+):(\d+)(?::\d+)?\s*(AM|PM)/i.exec(str || '');
     if (!m) return null;
     var h = Number(m[1]) % 12;
     if (m[3].toUpperCase() === 'PM') h += 12;
@@ -314,28 +360,48 @@
 
     var mins = now.getHours() * 60 + now.getMinutes();
     $('hint').style.display = (state.state === 'in' && mins > SHIFT_END_MIN) ? 'block' : 'none';
+
+    if (homeSince) {
+      var hm = Math.max(0, Math.floor((now - homeSince) / 60000));
+      $('htimer').textContent = Math.floor(hm / 60) + ':' + pad(hm % 60);
+    }
   }
 
-  // Fills the client dropdown. It is rebuilt only when the list from the sheet changes, so a selection is kept.
-  function fillClients(list, show) {
-    var sel = $('client');
-    sel.style.display = show ? 'block' : 'none';
-    if (!show) return;
+  function homeReady() {
+    return !!pickedClient && $('hnote').value.trim().length >= NOTE_MIN;
+  }
+
+  function updateHome() {
+    var n = $('hnote').value.trim().length, c = $('hcount');
+    c.className = 'counter' + (n >= NOTE_MIN ? ' ok' : '');
+    c.textContent = n >= NOTE_MIN ? 'Perfect, that is a clear update' : (NOTE_MIN - n) + ' more characters to go';
+    $('hout').disabled = busy || !homeReady();
+  }
+
+  // Draws the client chips. They are rebuilt only when the list changes, so the picked client is kept.
+  function fillClients(list) {
+    var box = $('chips');
     var sig = (list || []).join('|');
-    if (sel.getAttribute('data-sig') === sig) return;
-    var keep = sel.value;
-    sel.innerHTML = '';
-    var first = document.createElement('option');
-    first.value = ''; first.textContent = 'Select client or project';
-    sel.appendChild(first);
-    (list || []).forEach(function (c) {
-      var o = document.createElement('option');
-      o.value = c; o.textContent = c;
-      sel.appendChild(o);
+    if (box.getAttribute('data-sig') === sig) return;
+    box.setAttribute('data-sig', sig);
+    box.innerHTML = '';
+    if (!list || !list.length) {
+      var n = document.createElement('div');
+      n.className = 'none';
+      n.textContent = 'No clients added yet. Ask Champs to add them in the Clients tab.';
+      box.appendChild(n);
+      return;
+    }
+    list.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip' + (c === pickedClient ? ' on' : ''); b.textContent = c;
+      b.addEventListener('click', function () {
+        pickedClient = c;
+        Array.prototype.forEach.call(box.children, function (x) { x.classList.toggle('on', x === b); });
+        updateHome();
+      });
+      box.appendChild(b);
     });
-    if (keep) sel.value = keep;
-    if (sel.selectedIndex < 0) sel.selectedIndex = 0;
-    sel.setAttribute('data-sig', sig);
   }
 
   function render(s) {
@@ -349,27 +415,43 @@
     $('hr').textContent = s.hoursText || '-';
     $('in').disabled = busy || s.state !== 'none' || homeOpen;
     $('out').disabled = busy || s.state !== 'in';
-    $('hin').hidden = !(h.enabled && !homeOpen && h.canStart);
+    $('officeView').hidden = homeOpen;
+    $('note').style.display = s.state === 'in' ? 'block' : 'none';
+
+    // Home work panel
+    var showHome = h.enabled && (homeOpen || h.canStart || !!h.todayText);
+    $('home').hidden = !showHome;
+    $('home').className = 'home' + (homeOpen ? ' running' : '');
+    $('homeRun').hidden = !homeOpen;
+    $('hin').hidden = homeOpen || !h.canStart;
     $('hin').disabled = busy;
     $('hout').hidden = !homeOpen;
-    $('hout').disabled = busy;
-
-    $('note').style.display = (s.state === 'in' || homeOpen) ? 'block' : 'none';
-    $('note').placeholder = homeOpen
-      ? 'What did you work on from home? (required)'
-      : 'Working past your shift? Add a short note on what you worked on.';
-    fillClients(h.clients, homeOpen);
+    $('hnote').style.display = homeOpen ? 'block' : 'none';
+    homeSince = homeOpen ? parseTime(h.since) : null;
+    if (homeOpen) {
+      $('homeTitle').textContent = 'WFH mode: on';
+      $('homeSub').textContent = 'Started at ' + h.since + '. Your couch is working overtime too.' + (h.todayText ? ' Earlier today: ' + h.todayText + '.' : '');
+      $('htimerSub').textContent = 'of focused WFH time';
+      fillClients(h.clients);
+      updateHome();
+    } else if (h.canStart) {
+      $('homeTitle').textContent = 'Still in the zone?';
+      $('homeSub').textContent = (h.todayText ? 'WFH logged today: ' + h.todayText + '. ' : '') + 'Laptop open, chai ready? Start a WFH session so your extra effort gets counted. Pajamas are optional, the hours are not.';
+    } else {
+      $('homeTitle').textContent = 'WFH logged today';
+      $('homeSub').textContent = h.todayText + ' of bonus effort. Now go rest, you earned it.';
+    }
 
     var st = $('status');
     if (s.state === 'none') { st.textContent = 'Not logged in'; st.className = 'pill'; }
     if (s.state === 'in')   { st.textContent = 'Working'; st.className = 'pill working'; }
     if (s.state === 'done') { st.textContent = 'Done for the day'; st.className = 'pill done'; }
-    if (homeOpen)           { st.textContent = 'Working from home'; st.className = 'pill wfh'; }
+    if (homeOpen)           { st.textContent = 'WFH mode on'; st.className = 'pill wfh'; }
     $('ringwrap').className = 'ringwrap ' + (s.state === 'in' ? 'working' : '');
 
     var wfh = new Date().getDay() === 6;
     var md = $('mode');
-    md.style.display = 'inline-block';
+    md.style.display = homeOpen ? 'none' : 'inline-block';
     md.textContent = wfh ? 'WFH today' : 'Office';
     md.className = 'pill ' + (wfh ? 'wfh' : 'in');
 
@@ -379,11 +461,6 @@
     var loc = $('loc');
     loc.textContent = parts.join('  |  ');
     loc.className = 'loc' + (/not shared|unavailable|Outside|low accuracy/i.test(parts.join(' ')) ? ' warn' : '');
-
-    var hi = [];
-    if (homeOpen) hi.push('Home session running since ' + h.since);
-    if (h.todayText) hi.push('Home work today: ' + h.todayText);
-    $('homeinfo').textContent = hi.join('  |  ');
 
     setMsg(s.flags ? s.flags : (s.state === 'done' && !homeOpen ? 'Nice work today!' : ''), false);
     $('quote').textContent = quotes[new Date().getDate() % quotes.length];
@@ -406,8 +483,8 @@
   function act(action) {
     if (busy) return;
     if (action === 'homeEnd') {
-      if (!$('client').value) { setMsg('Pick the client or project you worked on.', true); return; }
-      if ($('note').value.trim().length < NOTE_MIN) { setMsg('Add a short note (at least ' + NOTE_MIN + ' characters) on what you worked on.', true); return; }
+      if (!pickedClient) { setMsg('Pick a client first, then we can log it.', true); return; }
+      if ($('hnote').value.trim().length < NOTE_MIN) { setMsg('Add a quick note (at least ' + NOTE_MIN + ' characters) on what you got done.', true); return; }
     }
     busy = true;
     ['in', 'out', 'hin', 'hout'].forEach(function (id) { $(id).disabled = true; });
@@ -419,14 +496,19 @@
       geoStatus = geo.status;
       setMsg('Saving...', false);
       var payload = { session: session, geo: geo };
-      if (action === 'logout' || action === 'homeEnd') payload.note = $('note').value;
-      if (action === 'homeEnd') payload.client = $('client').value;
+      if (action === 'logout') payload.note = $('note').value;
+      if (action === 'homeEnd') { payload.note = $('hnote').value; payload.client = pickedClient; }
       return api(action, payload);
     }).then(function (s) {
       busy = false;
-      if (action === 'logout' || action === 'homeEnd') $('note').value = '';
-      if (action === 'homeEnd') $('client').selectedIndex = 0;
+      if (action === 'logout') $('note').value = '';
+      if (action === 'homeEnd') {
+        $('hnote').value = ''; pickedClient = '';
+        $('chips').setAttribute('data-sig', '');
+      }
       render(s);
+      if (action === 'homeStart') setMsg('WFH session started. Make it count.', false);
+      if (action === 'homeEnd') setMsg('WFH session saved. Thank you for going the extra mile.', false);
       if (geoStatus !== 'ok') setMsg('Saved, but your location was not shared. Allow location for this app in your phone settings.', true);
     }).catch(function (e) {
       busy = false;
@@ -478,6 +560,7 @@
   $('out').addEventListener('click', function () { act('logout'); });
   $('hin').addEventListener('click', function () { act('homeStart'); });
   $('hout').addEventListener('click', function () { act('homeEnd'); });
+  $('hnote').addEventListener('input', updateHome);
   $('signout').addEventListener('click', function () { signOut(); });
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) return;
