@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070b18">
+  <title>Snoball · Share location</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+      font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f8fafc; text-align: center;
+      background:
+        radial-gradient(900px 600px at 15% 0%, rgba(99,102,241,.35), transparent 60%),
+        radial-gradient(800px 600px at 100% 100%, rgba(236,72,153,.28), transparent 55%), #070b18;
+    }
+    .card {
+      width: 100%; max-width: 380px; padding: 34px 24px 28px; border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.1); box-shadow: 0 40px 90px rgba(0,0,0,.5);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    }
+    .brand { font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase; color: #a5b4fc; font-weight: 700; }
+    .icon { width: 84px; height: 84px; margin: 22px auto 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 38px; background: rgba(129,140,248,.16); position: relative; }
+    .icon.pulse::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid rgba(129,140,248,.5); animation: ping 1.6s ease-out infinite; }
+    @keyframes ping { from { transform: scale(.9); opacity: 1 } to { transform: scale(1.35); opacity: 0 } }
+    .icon.ok { background: rgba(52,211,153,.18); }
+    .icon.bad { background: rgba(251,113,133,.16); }
+    h1 { font-size: 21px; margin: 0 0 8px; letter-spacing: -.3px; }
+    p { margin: 0; font-size: 14px; line-height: 1.55; color: #94a3b8; }
+    button {
+      margin-top: 22px; width: 100%; padding: 15px; border: 0; border-radius: 16px; font: 700 15px 'Inter', sans-serif; color: #fff; cursor: pointer;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1); box-shadow: 0 12px 30px rgba(99,102,241,.32); display: none;
+    }
+    button:active { transform: scale(.98); }
+    .small { margin-top: 16px; font-size: 12px; color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">Snoball &middot; Attendance</div>
+    <div class="icon pulse" id="icon">&#128205;</div>
+    <h1 id="title">Getting your location</h1>
+    <p id="text">Tap Allow when your phone asks. This takes a few seconds.</p>
+    <button id="retry" onclick="start()">Try again</button>
+    <div class="small" id="small"></div>
+  </div>
+
+<script>
+  var qs = new URLSearchParams(location.search);
+  var TOKEN = qs.get('token') || '';
+  var API = qs.get('api') || '';
+  var sent = false;
+
+  function $(id) { return document.getElementById(id); }
+
+  function show(kind, title, text, retry) {
+    var ic = $('icon');
+    ic.className = 'icon ' + (kind === 'wait' ? 'pulse' : kind);
+    ic.textContent = kind === 'ok' ? '\u2705' : kind === 'bad' ? '\u26A0\uFE0F' : '\uD83D\uDCCD';
+    $('title').textContent = title;
+    $('text').textContent = text;
+    $('retry').style.display = retry ? 'block' : 'none';
+  }
+
+  // Only a real token and an Apps Script link are accepted, so the token cannot be sent anywhere else.
+  function valid() {
+    return /^[0-9a-f-]{36}$/.test(TOKEN) && /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(API);
+  }
+
+  // Sends the result two ways: straight back to the attendance page (fastest), and to the script as a backup.
+  function report(status, lat, lng, acc) {
+    if (sent) return;
+    sent = true;
+
+    if (window.opener) {
+      try {
+        var msg = { type: 'snoball-geo', token: TOKEN, status: status };
+        if (status === 'ok') { msg.lat = lat; msg.lng = lng; msg.acc = acc; }
+        window.opener.postMessage(msg, '*');
+      } catch (e) {}
+    }
+
+    var url = API + '?action=geo&token=' + encodeURIComponent(TOKEN) + '&status=' + encodeURIComponent(status);
+    if (status === 'ok') url += '&lat=' + lat + '&lng=' + lng + '&acc=' + Math.round(acc || 0);
+
+    fetch(url).then(function (r) { return r.text(); }).then(function (t) {
+      if (t === 'expired') { sent = false; show('bad', 'This link expired', 'Go back to the attendance page and tap the button again.', false); }
+    }).catch(function () {
+      // Some browsers block reading the reply. The request itself still goes through.
+      try { fetch(url, { mode: 'no-cors' }); } catch (e) { new Image().src = url; }
+    });
+
+    if (status === 'ok') {
+      show('ok', 'Location shared', 'You can go back to the attendance page now.', false);
+      $('small').textContent = 'This tab closes by itself.';
+      setTimeout(function () { try { window.close(); } catch (e) {} }, 1200);
+    } else if (status === 'denied') {
+      show('bad', 'Location blocked', 'Your entry will be saved without a location. You can go back to the attendance page.', false);
+    } else {
+      show('bad', 'Location unavailable', 'Your entry will be saved without a location. You can go back to the attendance page.', false);
+    }
+  }
+
+  function got(pos) { report('ok', pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy); }
+
+  function start() {
+    if (!valid()) { show('bad', 'Invalid link', 'Open this page from the attendance app.', false); return; }
+    if (!navigator.geolocation) { report('unavailable'); return; }
+    sent = false;
+    show('wait', 'Getting your location', 'Tap Allow when your phone asks. This takes a few seconds.', false);
+
+    // Fast attempt first: network and Wi-Fi position, a recent fix is fine. Office check radius is 200 m.
+    navigator.geolocation.getCurrentPosition(got, function (err) {
+      if (err.code === 1) { report('denied'); return; }
+      // Second attempt with GPS if the fast one failed or timed out.
+      navigator.geolocation.getCurrentPosition(got, function (e2) {
+        report(e2.code === 1 ? 'denied' : 'unavailable');
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+    }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 });
+  }
+
+  start();
+</script>
+</body>
+</html>
