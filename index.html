@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Snoball Attendance</title>
-  <meta name="theme-color" content="#0b1020">
+  <meta name="theme-color" content="#070b18">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,153 +12,257 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
+    :root {
+      --bg: #070b18; --ink: #f8fafc; --mute: #94a3b8; --dim: #64748b;
+      --line: rgba(255,255,255,.09); --glass: rgba(255,255,255,.055);
+      --ind: #818cf8; --pink: #f472b6; --amber: #fbbf24; --violet: #c4b5fd;
+    }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     [hidden] { display: none !important; }
+    html, body { margin: 0; }
     body {
-      margin: 0; min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center;
       padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f1f5f9; overflow-x: hidden;
-      background: radial-gradient(1200px 700px at 20% 10%, #312e81 0%, transparent 60%),
-                  radial-gradient(900px 600px at 90% 90%, #831843 0%, transparent 55%), #0b1020;
+      font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: var(--ink); overflow-x: hidden;
+      background:
+        radial-gradient(900px 600px at 15% 0%, rgba(99,102,241,.35), transparent 60%),
+        radial-gradient(800px 600px at 100% 100%, rgba(236,72,153,.28), transparent 55%),
+        var(--bg);
     }
-    .blob { position: fixed; border-radius: 50%; filter: blur(70px); opacity: .45; z-index: 0; animation: float 14s ease-in-out infinite; }
-    .b1 { width: 340px; height: 340px; background: #6366f1; top: -80px; left: -60px; }
-    .b2 { width: 300px; height: 300px; background: #ec4899; bottom: -90px; right: -50px; animation-delay: -5s; }
-    .b3 { width: 220px; height: 220px; background: #14b8a6; top: 55%; left: 60%; animation-delay: -9s; opacity: .3; }
-    @keyframes float { 0%,100% { transform: translate(0,0) } 50% { transform: translate(30px,-35px) } }
+    .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: .35; z-index: 0; animation: float 16s ease-in-out infinite; pointer-events: none; }
+    .b1 { width: 320px; height: 320px; background: #6366f1; top: -90px; left: -70px; }
+    .b2 { width: 280px; height: 280px; background: #ec4899; bottom: -100px; right: -60px; animation-delay: -6s; }
+    @keyframes float { 0%,100% { transform: translate(0,0) } 50% { transform: translate(26px,-30px) } }
 
     .card {
-      position: relative; z-index: 1; width: 92%; max-width: 400px; margin: 16px 0; padding: 30px 26px 26px; text-align: center;
-      background: rgba(255,255,255,.07); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255,255,255,.14); border-radius: 28px;
-      box-shadow: 0 30px 80px rgba(0,0,0,.45);
+      position: relative; z-index: 1; width: 92%; max-width: 420px; margin: 16px 0; padding: 26px 22px 22px; text-align: center;
+      background: linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.04));
+      backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+      border: 1px solid var(--line); border-radius: 30px;
+      box-shadow: 0 40px 90px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
+      animation: rise .5s ease both;
     }
-    .brand { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #a5b4fc; font-weight: 700; }
-    .hello { font-size: 24px; font-weight: 700; margin: 10px 0 2px; }
-    .date { font-size: 13px; color: #94a3b8; }
-    .clock { font-size: 40px; font-weight: 300; letter-spacing: 2px; margin: 14px 0 4px; font-variant-numeric: tabular-nums;
+    @keyframes rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
+
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .brand { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase; color: #a5b4fc; font-weight: 700; }
+    .logo { width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, var(--ind), var(--pink)); display: inline-block; }
+    .pills { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .pill { font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.09); color: #cbd5e1; white-space: nowrap; }
+    .pill.in { background: rgba(52,211,153,.16); color: #6ee7b7; }
+    .pill.working { background: rgba(129,140,248,.2); color: #c7d2fe; }
+    .pill.done { background: rgba(251,191,36,.16); color: #fde68a; }
+    .pill.wfh { background: rgba(196,181,253,.2); color: #ddd6fe; }
+
+    .hello { font-size: 26px; font-weight: 800; letter-spacing: -.5px; margin: 20px 0 2px; }
+    .date { font-size: 13px; color: var(--mute); font-weight: 500; }
+    .clock { font-size: 44px; font-weight: 300; letter-spacing: 1px; margin: 10px 0 0; font-variant-numeric: tabular-nums;
              background: linear-gradient(90deg, #a5b4fc, #f9a8d4); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-    .pills { display: flex; gap: 8px; justify-content: center; margin: 10px 0 6px; flex-wrap: wrap; }
-    .pill { font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.1); color: #cbd5e1; }
-    .pill.in { background: rgba(34,197,94,.18); color: #86efac; }
-    .pill.working { background: rgba(99,102,241,.25); color: #c7d2fe; }
-    .pill.done { background: rgba(250,204,21,.18); color: #fde68a; }
-    .pill.wfh { background: rgba(168,85,247,.25); color: #e9d5ff; }
-
-    .ringwrap { position: relative; width: 210px; height: 210px; margin: 14px auto 6px; }
-    .ringwrap svg { transform: rotate(-90deg); }
-    .track { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 12; }
-    .bar { fill: none; stroke: url(#grad); stroke-width: 12; stroke-linecap: round; stroke-dasharray: 527.8; stroke-dashoffset: 527.8;
-           transition: stroke-dashoffset 1s ease; }
-    .working .bar { animation: glow 2.2s ease-in-out infinite; }
+    .ringwrap { position: relative; width: 220px; height: 220px; margin: 14px auto 4px; }
+    .ringwrap svg { transform: rotate(-90deg); display: block; }
+    .track { fill: none; stroke: rgba(255,255,255,.08); stroke-width: 12; }
+    .bar { fill: none; stroke: url(#grad); stroke-width: 12; stroke-linecap: round; stroke-dasharray: 527.8; stroke-dashoffset: 527.8; transition: stroke-dashoffset 1s ease; }
+    .working .bar { animation: glow 2.4s ease-in-out infinite; }
     @keyframes glow { 0%,100% { filter: drop-shadow(0 0 3px #818cf8) } 50% { filter: drop-shadow(0 0 12px #f472b6) } }
     .ringtext { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .ringtext .big { font-size: 38px; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .ringtext .small { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+    .ringtext .big { font-size: 42px; font-weight: 800; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+    .ringtext .small { font-size: 12px; color: var(--mute); margin-top: 2px; font-weight: 500; }
 
-    .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 6px; }
-    .tile { background: rgba(255,255,255,.07); border-radius: 16px; padding: 12px 6px; }
-    .tile .k { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-    .tile .v { font-size: 15px; font-weight: 700; margin-top: 4px; }
+    .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 0; }
+    .tile { background: var(--glass); border: 1px solid var(--line); border-radius: 16px; padding: 11px 6px; }
+    .tile .k { font-size: 10px; color: var(--mute); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; }
+    .tile .v { font-size: 14px; font-weight: 700; margin-top: 4px; }
 
-    .loc { font-size: 12px; color: #94a3b8; margin-top: 10px; min-height: 16px; }
-    .loc.warn { color: #fbbf24; }
+    .loc { display: none; align-items: flex-start; gap: 8px; margin-top: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(52,211,153,.08);
+           border: 1px solid rgba(52,211,153,.2); font-size: 12px; color: #a7f3d0; line-height: 1.45; text-align: left; }
+    .loc.show { display: flex; }
+    .loc.warn { background: rgba(251,191,36,.09); border-color: rgba(251,191,36,.25); color: #fde68a; }
+    .loc .pin { flex: none; }
 
     textarea {
-      display: none; width: 100%; margin-top: 14px; padding: 12px 14px; border-radius: 14px; font-family: inherit;
-      border: 1px solid rgba(255,255,255,.18); background: rgba(15,23,42,.6); color: #f1f5f9; font-size: 16px; outline: none; resize: none;
+      display: none; width: 100%; margin-top: 12px; padding: 12px 14px; border-radius: 14px; font-family: inherit;
+      border: 1px solid var(--line); background: rgba(15,23,42,.65); color: var(--ink); font-size: 16px; outline: none; resize: none;
     }
-    textarea:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,.25); }
+    textarea:focus, .select:focus { border-color: var(--ind); box-shadow: 0 0 0 3px rgba(129,140,248,.22); }
+    .hint { font-size: 12px; color: var(--amber); margin-top: 8px; display: none; text-align: left; }
 
-    /* ---- WFH panel ---- */
-    .home { margin-top: 20px; padding: 18px 16px 16px; text-align: left; border-radius: 22px;
-            background: linear-gradient(160deg, rgba(139,92,246,.22), rgba(236,72,153,.10));
-            border: 1px solid rgba(196,181,253,.28); }
-    .home.running { border-color: rgba(244,114,182,.55); box-shadow: 0 0 0 3px rgba(244,114,182,.12); }
-    .home-head { display: flex; align-items: center; gap: 12px; }
-    .home-ico { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,.12); display: flex;
-                align-items: center; justify-content: center; font-size: 20px; flex: none; }
-    .home-title { font-size: 16px; font-weight: 700; }
-    .home-sub { font-size: 12px; color: #c4b5fd; margin-top: 2px; line-height: 1.4; }
-    .htimer { font-size: 44px; font-weight: 300; text-align: center; margin: 16px 0 2px; letter-spacing: 1px;
-              font-variant-numeric: tabular-nums; background: linear-gradient(90deg, #c4b5fd, #f9a8d4);
-              -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .htimer-sub { text-align: center; font-size: 12px; color: #94a3b8; }
-    .hlabel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #a5b4fc; margin: 18px 0 8px; }
-    .select { width: 100%; padding: 12px 40px 12px 14px; font-size: 16px; font-weight: 600; font-family: inherit; color: #f1f5f9;
-              border-radius: 14px; border: 1px solid rgba(255,255,255,.18); background-color: rgba(15,23,42,.6); outline: none;
-              cursor: pointer; appearance: none; -webkit-appearance: none; color-scheme: dark;
-              background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23a5b4fc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-              background-repeat: no-repeat; background-position: right 14px center; }
-    .select:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,.25); }
-    .select.picked { border-color: rgba(196,181,253,.7); }
-    .select:disabled { opacity: .6; cursor: not-allowed; }
-    .select option { background: #0f172a; color: #f1f5f9; }
-    .home textarea { margin-top: 0; }
-    .counter { font-size: 12px; color: #94a3b8; margin-top: 6px; text-align: right; }
-    .counter.ok { color: #86efac; }
-    .home button.act { margin-top: 16px; }
-    .hint { font-size: 12px; color: #fbbf24; margin-top: 8px; display: none; }
-
-    .btns { margin-top: 18px; display: grid; gap: 10px; }
+    .btns { margin-top: 16px; display: grid; gap: 10px; }
     button {
-      width: 100%; padding: 15px; font-size: 16px; font-weight: 700; color: #fff; border: 0; border-radius: 16px; cursor: pointer;
-      transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease; letter-spacing: .3px; font-family: inherit;
+      position: relative; width: 100%; padding: 16px; font-size: 16px; font-weight: 700; color: #fff; border: 0; border-radius: 16px; cursor: pointer;
+      transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease; letter-spacing: .2px; font-family: inherit;
     }
-    #in   { background: linear-gradient(135deg, #22c55e, #14b8a6); box-shadow: 0 10px 28px rgba(34,197,94,.35); }
-    #out  { background: linear-gradient(135deg, #f43f5e, #f97316); box-shadow: 0 10px 28px rgba(244,63,94,.35); }
-    #hin  { background: linear-gradient(135deg, #8b5cf6, #6366f1); box-shadow: 0 10px 28px rgba(99,102,241,.35); }
-    #hout { background: linear-gradient(135deg, #a855f7, #ec4899); box-shadow: 0 10px 28px rgba(168,85,247,.35); }
-    button:hover:not(:disabled) { transform: translateY(-2px); }
+    #in   { background: linear-gradient(135deg, #10b981, #06b6d4); box-shadow: 0 12px 30px rgba(16,185,129,.32); }
+    #out  { background: linear-gradient(135deg, #f43f5e, #fb923c); box-shadow: 0 12px 30px rgba(244,63,94,.3); }
+    #hin  { background: linear-gradient(135deg, #8b5cf6, #6366f1); box-shadow: 0 12px 30px rgba(99,102,241,.32); }
+    #hout { background: linear-gradient(135deg, #a855f7, #ec4899); box-shadow: 0 12px 30px rgba(168,85,247,.32); }
     button:active:not(:disabled) { transform: scale(.98); }
-    button:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
+    button:disabled { opacity: .32; cursor: not-allowed; box-shadow: none; }
+    button.busy { opacity: 1 !important; color: transparent; pointer-events: none; }
+    button.busy::after { content: ''; position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px;
+                         border: 3px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg) } }
     button.link { width: auto; margin: 10px auto 0; padding: 6px 10px; font-size: 12px; font-weight: 600;
                   background: none; box-shadow: none; color: #a5b4fc; text-decoration: underline; display: block; }
-    button.install { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); margin-top: 14px; font-size: 14px; }
+    button.install { background: rgba(255,255,255,.09); border: 1px solid var(--line); margin-top: 14px; font-size: 14px; }
 
-    .msg { margin-top: 16px; font-size: 13px; min-height: 20px; color: #fbbf24; }
+    .steps { display: none; margin-top: 14px; padding: 12px; border-radius: 16px; background: var(--glass); border: 1px solid var(--line); gap: 8px; }
+    .steps.show { display: grid; }
+    .step { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--dim); font-weight: 500; text-align: left; }
+    .step i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,.18); flex: none; display: inline-block; position: relative; }
+    .step.active { color: var(--ink); }
+    .step.active i { border-color: var(--ind); border-top-color: transparent; animation: spin .8s linear infinite; }
+    .step.done { color: #6ee7b7; }
+    .step.done i { background: #10b981; border-color: #10b981; animation: none; }
+    .step.done i::after { content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+
+    .msg { margin-top: 14px; font-size: 13px; min-height: 18px; color: var(--amber); line-height: 1.45; }
     .msg.err { color: #fda4af; }
-    .quote { margin-top: 14px; font-size: 12px; color: #94a3b8; font-style: italic; }
-    .foot { margin-top: 14px; font-size: 11px; color: #64748b; }
+    .msg.ok { color: #6ee7b7; }
+    .quote { margin-top: 12px; font-size: 12px; color: var(--mute); font-style: italic; line-height: 1.5; }
+    .foot { margin-top: 12px; font-size: 11px; color: var(--dim); }
 
-    .signin p { color: #cbd5e1; font-size: 14px; margin: 14px 0 0; line-height: 1.5; }
+    .home { margin-top: 16px; padding: 18px 16px 16px; text-align: left; border-radius: 22px;
+            background: linear-gradient(160deg, rgba(139,92,246,.22), rgba(236,72,153,.1)); border: 1px solid rgba(196,181,253,.26); }
+    .home.running { border-color: rgba(244,114,182,.55); box-shadow: 0 0 0 3px rgba(244,114,182,.12); }
+    .home-head { display: flex; align-items: center; gap: 12px; }
+    .home-ico { width: 42px; height: 42px; border-radius: 13px; background: rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center; font-size: 21px; flex: none; }
+    .home-title { font-size: 16px; font-weight: 700; }
+    .home-sub { font-size: 12px; color: var(--violet); margin-top: 2px; line-height: 1.45; }
+    .htimer { font-size: 46px; font-weight: 300; text-align: center; margin: 16px 0 2px; letter-spacing: 1px; font-variant-numeric: tabular-nums;
+              background: linear-gradient(90deg, #c4b5fd, #f9a8d4); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .htimer-sub { text-align: center; font-size: 12px; color: var(--mute); }
+    .hlabel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #a5b4fc; margin: 16px 0 8px; }
+    .select { width: 100%; padding: 13px 40px 13px 14px; font-size: 16px; font-weight: 600; font-family: inherit; color: var(--ink);
+              border-radius: 14px; border: 1px solid var(--line); background-color: rgba(15,23,42,.65); outline: none; cursor: pointer;
+              appearance: none; -webkit-appearance: none; color-scheme: dark;
+              background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23a5b4fc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+              background-repeat: no-repeat; background-position: right 14px center; }
+    .select.picked { border-color: rgba(196,181,253,.7); }
+    .select:disabled { opacity: .6; cursor: not-allowed; }
+    .select option { background: #0f172a; color: var(--ink); }
+    .home textarea { margin-top: 0; }
+    .counter { font-size: 12px; color: var(--mute); margin-top: 6px; text-align: right; }
+    .counter.ok { color: #6ee7b7; }
+    .home button.act { margin-top: 16px; }
+
+    .signin p { color: #cbd5e1; font-size: 14px; margin: 12px 0 0; line-height: 1.55; }
+    .signin .hero { width: 76px; height: 76px; margin: 24px auto 4px; border-radius: 24px; background: linear-gradient(135deg, var(--ind), var(--pink));
+                    display: flex; align-items: center; justify-content: center; font-size: 34px; box-shadow: 0 18px 40px rgba(99,102,241,.4); }
     .gbtn { display: flex; justify-content: center; margin-top: 22px; min-height: 44px; }
     .spin { width: 28px; height: 28px; border: 3px solid rgba(255,255,255,.18); border-top-color: #fff; border-radius: 50%;
-            margin: 22px auto 8px; animation: s 1s linear infinite; }
-    @keyframes s { to { transform: rotate(360deg); } }
+            margin: 26px auto 8px; animation: spin 1s linear infinite; }
+
+
+    /* ---- Owl mascot ---- */
+    .hero { display: flex; align-items: center; gap: 10px; margin-top: 16px; text-align: left; }
+    .hero .hello { margin: 0; font-size: 22px; }
+    .herotext { flex: 1; min-width: 0; }
+    .owl { flex: none; width: 96px; height: 104px; cursor: pointer; touch-action: manipulation; -webkit-user-select: none; user-select: none; outline: none; }
+    .owl svg { display: block; overflow: visible; }
+    #owlg { transform-origin: 60px 70px; }
+    .br { transform-origin: 60px 118px; animation: breathe 3.6s ease-in-out infinite; }
+    @keyframes breathe { 0%,100% { transform: scaleY(1) } 50% { transform: scaleY(1.025) } }
+    .lid { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); animation: blink 5.5s infinite; }
+    @keyframes blink { 0%,86% { transform: scaleY(0) } 89% { transform: scaleY(1) } 92% { transform: scaleY(0) } 94% { transform: scaleY(1) } 97%,100% { transform: scaleY(0) } }
+    .pupil { transition: transform .14s ease-out; }
+    .pp { transform-box: fill-box; transform-origin: center; transition: transform .2s ease; }
+    .owl.wow .pp { transform: scale(1.35); }
+    .blush { opacity: 0; transition: opacity .4s ease; }
+    .owl.happy .blush { opacity: .75; }
+    .owl.sleepy .lid { animation: none; transform: scaleY(.55); }
+    .owl.sleepy.wow .lid { transform: scaleY(0); }
+    .owl.sleepy .br { animation-duration: 5.5s; }
+    .wl { transform-origin: 24px 62px; }
+    .wr { transform-origin: 96px 62px; }
+    #owlg.hop { animation: hop .7s ease; }
+    #owlg.spin { animation: spin .9s ease; }
+    #owlg.flap .wl { animation: flapL .7s ease-in-out 2; }
+    #owlg.flap .wr { animation: flapR .7s ease-in-out 2; }
+    @keyframes hop { 0% { transform: translateY(0) } 30% { transform: translateY(-16px) rotate(-5deg) } 60% { transform: translateY(0) rotate(4deg) } 80% { transform: translateY(-4px) } 100% { transform: none } }
+    @keyframes spin { from { transform: rotate(0) } to { transform: rotate(360deg) } }
+    @keyframes flapL { 0%,100% { transform: rotate(0) } 25%,65% { transform: rotate(-32deg) } 45% { transform: rotate(-8deg) } }
+    @keyframes flapR { 0%,100% { transform: rotate(0) } 25%,65% { transform: rotate(32deg) } 45% { transform: rotate(8deg) } }
+    .bubble { position: relative; display: inline-block; margin-top: 9px; padding: 7px 11px; border-radius: 14px 14px 14px 4px;
+              background: rgba(129,140,248,.18); border: 1px solid rgba(129,140,248,.32); color: #e0e7ff; font-size: 12px; font-weight: 500; line-height: 1.35;
+              opacity: 0; transform: translateY(4px) scale(.96); transition: opacity .25s ease, transform .25s ease; min-height: 30px; }
+    .bubble.show { opacity: 1; transform: none; }
+
+    @media (max-width: 380px) { .clock { font-size: 38px } .ringwrap, .ringwrap svg { width: 200px; height: 200px } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </head>
 <body>
-  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="blob b1"></div><div class="blob b2"></div>
 
   <div class="card" id="card">
-    <div class="brand">Snoball &middot; Attendance</div>
-
-    <div id="boot"><div class="spin"></div><div class="date">Loading</div></div>
+    <div id="boot"><div class="brand" style="justify-content:center"><span class="logo"></span>Snoball</div><div class="spin"></div><div class="date">Loading</div></div>
 
     <div id="signin" class="signin" hidden>
-      <div class="hello">Welcome</div>
+      <div class="brand" style="justify-content:center"><span class="logo"></span>Snoball &middot; Attendance</div>
+      <div class="hero">&#9200;</div>
+      <div class="hello" style="margin-top:14px">Welcome</div>
       <p>Sign in with your @owledmedia.com account to mark attendance.</p>
       <div id="gbtn" class="gbtn"></div>
       <div class="msg err" id="signerr"></div>
     </div>
 
     <div id="main" hidden>
-      <div class="hello" id="hello">Hello</div>
-      <div class="date" id="date"></div>
-      <div class="clock" id="clock">--:--:--</div>
-
-      <div class="pills">
-        <span class="pill" id="status">Loading</span>
-        <span class="pill" id="mode" style="display:none"></span>
+      <div class="top">
+        <div class="brand"><span class="logo"></span>Snoball</div>
+        <div class="pills">
+          <span class="pill" id="status">Loading</span>
+          <span class="pill" id="mode" style="display:none"></span>
+        </div>
       </div>
+
+      <div class="hero">
+        <div class="owl" id="owl" role="button" tabindex="0" aria-label="Owl mascot. Tap me.">
+          <svg viewBox="0 0 120 130" width="96" height="104" aria-hidden="true">
+            <defs>
+              <linearGradient id="obg" gradientUnits="userSpaceOnUse" x1="0" y1="18" x2="0" y2="118">
+                <stop offset="0" stop-color="#7c83f7"/><stop offset="1" stop-color="#4f46e5"/>
+              </linearGradient>
+            </defs>
+            <rect x="12" y="120" width="96" height="7" rx="3.5" fill="#92400e"/>
+            <g id="owlg"><g class="br">
+              <g stroke="#fb923c" stroke-width="3" stroke-linecap="round" fill="none">
+                <path d="M46 114l-5 6M46 114v7M46 114l5 6"/><path d="M74 114l-5 6M74 114v7M74 114l5 6"/>
+              </g>
+              <path class="wl" d="M24 62 C6 70 8 100 28 106 C34 92 34 74 24 62Z" fill="#4338ca"/>
+              <path class="wr" d="M96 62 C114 70 112 100 92 106 C86 92 86 74 96 62Z" fill="#4338ca"/>
+              <ellipse cx="60" cy="76" rx="38" ry="42" fill="url(#obg)"/>
+              <path d="M28 42 L22 14 L50 34Z" fill="#4f46e5"/>
+              <path d="M92 42 L98 14 L70 34Z" fill="#4f46e5"/>
+              <ellipse cx="60" cy="52" rx="40" ry="34" fill="url(#obg)"/>
+              <ellipse cx="60" cy="90" rx="23" ry="26" fill="#fde9d0"/>
+              <path d="M49 80q4 5 8 0M61 80q4 5 8 0M43 92q4 5 8 0M55 92q4 5 8 0M67 92q4 5 8 0M49 104q4 5 8 0M61 104q4 5 8 0" fill="none" stroke="#e2bf98" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="42" cy="50" r="17" fill="#312e81"/><circle cx="78" cy="50" r="17" fill="#312e81"/>
+              <circle cx="42" cy="50" r="13" fill="#fff"/><circle cx="78" cy="50" r="13" fill="#fff"/>
+              <g class="pupil" id="pl"><circle class="pp" cx="42" cy="50" r="6.5" fill="#0f172a"/><circle cx="44.6" cy="47.4" r="2" fill="#fff"/></g>
+              <g class="pupil" id="pr"><circle class="pp" cx="78" cy="50" r="6.5" fill="#0f172a"/><circle cx="80.6" cy="47.4" r="2" fill="#fff"/></g>
+              <g class="lid"><circle cx="42" cy="50" r="17.5" fill="url(#obg)"/><path d="M31 50 q11 7 22 0" stroke="#312e81" stroke-width="2.5" fill="none" stroke-linecap="round"/></g>
+              <g class="lid"><circle cx="78" cy="50" r="17.5" fill="url(#obg)"/><path d="M67 50 q11 7 22 0" stroke="#312e81" stroke-width="2.5" fill="none" stroke-linecap="round"/></g>
+              <path d="M54 60 Q60 57 66 60 L60 73Z" fill="#fb923c"/>
+              <ellipse class="blush" cx="24" cy="66" rx="6" ry="4" fill="#f9a8d4"/><ellipse class="blush" cx="96" cy="66" rx="6" ry="4" fill="#f9a8d4"/>
+            </g></g>
+          </svg>
+        </div>
+        <div class="herotext">
+          <div class="hello" id="hello">Hello</div>
+          <div class="date" id="date"></div>
+          <div class="bubble" id="bubble"></div>
+        </div>
+      </div>
+      <div class="clock" id="clock">--:--:--</div>
 
       <div id="officeView">
         <div class="ringwrap" id="ringwrap">
-          <svg width="210" height="210" viewBox="0 0 210 210">
+          <svg width="220" height="220" viewBox="0 0 210 210">
             <defs>
               <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/>
@@ -192,7 +296,7 @@
 
       <div class="home" id="home" hidden>
         <div class="home-head">
-          <div class="home-ico">🏠</div>
+          <div class="home-ico">&#127969;</div>
           <div>
             <div class="home-title" id="homeTitle">Work from home</div>
             <div class="home-sub" id="homeSub"></div>
@@ -215,6 +319,11 @@
         <button id="hout" class="act" hidden disabled>Finish WFH session</button>
       </div>
 
+      <div class="steps" id="steps">
+        <div class="step" id="s1"><i></i>Getting your location</div>
+        <div class="step" id="s2"><i></i>Saving your entry</div>
+      </div>
+
       <div class="msg" id="msg"></div>
       <div class="quote" id="quote"></div>
       <div class="foot">Shift 10:30 AM &ndash; 7:30 PM &middot; Saturday is work from home</div>
@@ -226,17 +335,19 @@
   </div>
 
 <script>
-  // ---- Fill the Client ID in (see SETUP.md). API_URL is your public /exec link. ----
+  // ---- API_URL is your public /exec link. ----
   var CONFIG = {
     API_URL: 'https://script.google.com/macros/s/AKfycbyIUWA_E84pCyujuLkPAuid44q_NcWYdTdnmVntrd5M_ehhbylmuGBsURsMhWdWnBU/exec',
     CLIENT_ID: '356672302362-ldqsm3h35ellqotc976ms9sacbjmt3se.apps.googleusercontent.com'
   };
 
   // Change this value every time you update this file. Open apps check it and reload themselves when it changes.
-  var APP_VERSION = '2026-11-11-1';
+  var APP_VERSION = '2026-11-24-2';
 
   var SHIFT_HOURS = 9, SHIFT_END_MIN = 19 * 60 + 30, C = 527.8, NOTE_MIN = 15;
-  var KEY_SESSION = 'snoball_att_session';
+  var KEY_SESSION = 'snoball_att_session', KEY_STATE = 'snoball_att_state';
+  var GEO_FRESH_MS = 90000;
+  var BTN_OF = { login: 'in', logout: 'out', homeStart: 'hin', homeEnd: 'hout' };
   var quotes = [
     'Small steps every day add up to big launches.',
     'Done is better than perfect. Ship it.',
@@ -249,17 +360,30 @@
   ];
   var state = { state: 'none', login: '', logout: '', hours: '' };
   var pickedClient = '', homeSince = null;
-  var busy = false, signedIn = false, deferredInstall = null;
+  var busy = false, stale = false, signedIn = false, deferredInstall = null;
+  var geoCache = null, geoPromise = null;
 
   function $(id) { return document.getElementById(id); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function save(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) {} }
   function load(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function buzz() { try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {} }
 
   function view(which) {
     ['boot', 'signin', 'main'].forEach(function (id) { $(id).hidden = id !== which; });
     signedIn = which === 'main';
   }
+
+  function setMsg(text, kind) {
+    var m = $('msg');
+    m.className = 'msg' + (kind === true || kind === 'err' ? ' err' : kind === 'ok' ? ' ok' : '');
+    m.textContent = text || '';
+  }
+  function setStep(n) {
+    $('steps').className = 'steps' + (n ? ' show' : '');
+    for (var i = 1; i <= 2; i++) $('s' + i).className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
+  }
+  function clearBusy() { ['in', 'out', 'hin', 'hout'].forEach(function (id) { $(id).classList.remove('busy'); }); }
 
   // ---------- API ----------
   function api(action, payload) {
@@ -301,6 +425,8 @@
 
   function signOut(message) {
     save(KEY_SESSION, '');
+    save(KEY_STATE, '');
+    stale = false;
     try { if (window.google && google.accounts) google.accounts.id.disableAutoSelect(); } catch (e) {}
     view('signin');
     $('signerr').textContent = message || '';
@@ -310,37 +436,36 @@
     var session = load(KEY_SESSION);
     if (!session) { signOut(); return Promise.resolve(); }
     return api('state', { session: session }).then(function (s) {
+      stale = false;
       view('main');
       render(s);
+      warmGeo();
     }).catch(function (e) {
+      stale = false;
       if (e.code === 'AUTH') { signOut(e.message); return; }
-      if (signedIn) { setMsg(e.message, true); return; }
+      if (signedIn) { render(state); setMsg(e.message, true); return; }
       view('signin');
       $('signerr').textContent = e.message;
     });
   }
 
   // ---------- Screen ----------
+  // Turns "10:30 AM" into today's date at that time. If that is still ahead of now, the login was yesterday (after midnight case).
   function parseTime(str) {
     var m = /(\d+):(\d+)(?::\d+)?\s*(AM|PM)/i.exec(str || '');
     if (!m) return null;
     var h = Number(m[1]) % 12;
     if (m[3].toUpperCase() === 'PM') h += 12;
     var d = new Date(); d.setHours(h, Number(m[2]), 0, 0);
+    if (d > new Date()) d.setDate(d.getDate() - 1);
     return d;
   }
 
   function greet(name) {
     var h = new Date().getHours();
     var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-    var icon = h < 12 ? '☀️' : h < 17 ? '🌤️' : '🌙';
+    var icon = h < 12 ? '\u2600\uFE0F' : h < 17 ? '\uD83C\uDF24\uFE0F' : '\uD83C\uDF19';
     $('hello').textContent = g + ', ' + String(name || '').split(' ')[0] + ' ' + icon;
-  }
-
-  function setMsg(text, isErr) {
-    var m = $('msg');
-    m.className = 'msg' + (isErr ? ' err' : '');
-    m.textContent = text || '';
   }
 
   function tick() {
@@ -362,7 +487,7 @@
     $('ringsub').textContent = hours > SHIFT_HOURS ? 'past the 9h shift' : 'of 9h shift';
 
     var mins = now.getHours() * 60 + now.getMinutes();
-    $('hint').style.display = (state.state === 'in' && mins > SHIFT_END_MIN) ? 'block' : 'none';
+    $('hint').style.display = (state.state === 'in' && (mins > SHIFT_END_MIN || hours > SHIFT_HOURS)) ? 'block' : 'none';
 
     if (homeSince) {
       var hm = Math.max(0, Math.floor((now - homeSince) / 60000));
@@ -370,15 +495,13 @@
     }
   }
 
-  function homeReady() {
-    return !!pickedClient && $('hnote').value.trim().length >= NOTE_MIN;
-  }
+  function homeReady() { return !!pickedClient && $('hnote').value.trim().length >= NOTE_MIN; }
 
   function updateHome() {
     var n = $('hnote').value.trim().length, c = $('hcount');
     c.className = 'counter' + (n >= NOTE_MIN ? ' ok' : '');
     c.textContent = n >= NOTE_MIN ? 'Perfect, that is a clear update' : (NOTE_MIN - n) + ' more characters to go';
-    $('hout').disabled = busy || !homeReady();
+    $('hout').disabled = busy || stale || !homeReady();
   }
 
   // Fills the client dropdown. It is rebuilt only when the list changes, so the picked client is kept.
@@ -412,25 +535,30 @@
 
   function render(s) {
     state = s;
+    clearBusy();
+    setStep(0);
     var h = s.home || { enabled: false, open: false, canStart: false };
     var homeOpen = !!h.open;
+    var lock = busy || stale;
+
+    // Remember the last screen so the app opens instantly next time.
+    save(KEY_STATE, JSON.stringify({ s: s, d: new Date().toDateString() }));
 
     greet(s.name);
     $('li').textContent = s.login || '-';
     $('lo').textContent = s.logout || '-';
     $('hr').textContent = s.hoursText || '-';
-    $('in').disabled = busy || s.state !== 'none' || homeOpen;
-    $('out').disabled = busy || s.state !== 'in';
+    $('in').disabled = lock || s.state !== 'none' || homeOpen;
+    $('out').disabled = lock || s.state !== 'in';
     $('officeView').hidden = homeOpen;
     $('note').style.display = s.state === 'in' ? 'block' : 'none';
 
-    // Home work panel
     var showHome = h.enabled && (homeOpen || h.canStart || !!h.todayText);
     $('home').hidden = !showHome;
     $('home').className = 'home' + (homeOpen ? ' running' : '');
     $('homeRun').hidden = !homeOpen;
     $('hin').hidden = homeOpen || !h.canStart;
-    $('hin').disabled = busy;
+    $('hin').disabled = lock;
     $('hout').hidden = !homeOpen;
     $('hnote').style.display = homeOpen ? 'block' : 'none';
     homeSince = homeOpen ? parseTime(h.since) : null;
@@ -465,56 +593,100 @@
     if (s.locIn) parts.push('In: ' + s.locIn);
     if (s.locOut) parts.push('Out: ' + s.locOut);
     var loc = $('loc');
-    loc.textContent = parts.join('  |  ');
-    loc.className = 'loc' + (/not shared|unavailable|Outside|low accuracy/i.test(parts.join(' ')) ? ' warn' : '');
+    loc.innerHTML = '';
+    if (parts.length) {
+      var warn = /not shared|unavailable|Outside|low accuracy/i.test(parts.join(' '));
+      loc.className = 'loc show' + (warn ? ' warn' : '');
+      var pin = document.createElement('span'); pin.className = 'pin'; pin.textContent = warn ? '\u26A0\uFE0F' : '\uD83D\uDCCD';
+      var tx = document.createElement('span'); tx.textContent = parts.join('   |   ');
+      loc.appendChild(pin); loc.appendChild(tx);
+    } else {
+      loc.className = 'loc';
+    }
 
-    setMsg(s.flags ? s.flags : (s.state === 'done' && !homeOpen ? 'Nice work today!' : ''), false);
+    if (s.flags) setMsg(s.flags, false);
+    else if (s.state === 'done' && !homeOpen) setMsg('Nice work today!', 'ok');
+    else setMsg('', false);
     $('quote').textContent = quotes[new Date().getDate() % quotes.length];
     tick();
+    owlUpdate(s, homeOpen);
   }
 
-  // ---------- Location and actions ----------
+  // ---------- Location ----------
+  // Fast attempt first (network and Wi-Fi position, a recent fix is fine). GPS only if that fails.
+  // The office check radius is 200 m, so a precise satellite fix is not needed.
   function getGeo() {
     return new Promise(function (resolve) {
       if (!navigator.geolocation) { resolve({ status: 'unavailable' }); return; }
-      navigator.geolocation.getCurrentPosition(
-        function (pos) { resolve({ status: 'ok', lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }); },
-        function (err) { resolve({ status: err && err.code === 1 ? 'denied' : 'unavailable' }); },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-      );
+      function ok(pos) {
+        var g = { status: 'ok', lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
+        geoCache = { geo: g, t: Date.now() };
+        resolve(g);
+      }
+      navigator.geolocation.getCurrentPosition(ok, function (err) {
+        if (err && err.code === 1) { resolve({ status: 'denied' }); return; }
+        navigator.geolocation.getCurrentPosition(ok, function (e2) {
+          resolve({ status: e2 && e2.code === 1 ? 'denied' : 'unavailable' });
+        }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+      }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 });
     });
   }
 
+  function freshGeo() { return geoCache && Date.now() - geoCache.t < GEO_FRESH_MS ? geoCache.geo : null; }
+
+  function locate() {
+    var f = freshGeo();
+    if (f) return Promise.resolve(f);
+    if (!geoPromise) geoPromise = getGeo().then(function (g) { geoPromise = null; return g; });
+    return geoPromise;
+  }
+
+  // If location is already allowed, get a fix in the background so the tap does not wait for it.
+  function warmGeo() {
+    if (!navigator.geolocation || freshGeo() || geoPromise) return;
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then(function (p) {
+        if (p.state === 'granted') locate();
+      }).catch(function () {});
+    }
+  }
+
+  // ---------- Actions ----------
   // action is one of: login, logout, homeStart, homeEnd
   function act(action) {
-    if (busy) return;
+    if (busy || stale) return;
     if (action === 'homeEnd') {
       if (!pickedClient) { setMsg('Pick a client first, then we can log it.', true); return; }
       if ($('hnote').value.trim().length < NOTE_MIN) { setMsg('Add a quick note (at least ' + NOTE_MIN + ' characters) on what you got done.', true); return; }
     }
     busy = true;
     ['in', 'out', 'hin', 'hout'].forEach(function (id) { $(id).disabled = true; });
-    setMsg('Getting your location...', false);
+    var b = $(BTN_OF[action]); if (b) b.classList.add('busy');
+    setMsg('', false);
     var session = load(KEY_SESSION);
     var geoStatus = 'ok';
 
-    getGeo().then(function (geo) {
+    setStep(freshGeo() ? 2 : 1);
+    locate().then(function (geo) {
       geoStatus = geo.status;
-      setMsg('Saving...', false);
+      setStep(2);
       var payload = { session: session, geo: geo };
       if (action === 'logout') payload.note = $('note').value;
       if (action === 'homeEnd') { payload.note = $('hnote').value; payload.client = pickedClient; }
       return api(action, payload);
     }).then(function (s) {
       busy = false;
+      buzz();
       if (action === 'logout') $('note').value = '';
       if (action === 'homeEnd') {
         $('hnote').value = ''; pickedClient = '';
         $('clientSel').setAttribute('data-sig', '');
       }
       render(s);
-      if (action === 'homeStart') setMsg('WFH session started. Make it count.', false);
-      if (action === 'homeEnd') setMsg('WFH session saved. Thank you for going the extra mile.', false);
+      if (action === 'login') setMsg('You are in. Have a great day.', 'ok');
+      if (action === 'logout') setMsg('Logged out. Thank you for today.', 'ok');
+      if (action === 'homeStart') setMsg('WFH session started. Make it count.', 'ok');
+      if (action === 'homeEnd') setMsg('WFH session saved. Thank you for going the extra mile.', 'ok');
       if (geoStatus !== 'ok') setMsg('Saved, but your location was not shared. Allow location for this app in your phone settings.', true);
     }).catch(function (e) {
       busy = false;
@@ -561,6 +733,91 @@
       .catch(function () {});
   }
 
+  // ---------- Owl ----------
+  var OWL = {
+    greet: {
+      idle: ['Ready when you are.', 'Good luck today.'],
+      working: ['Eyes on the prize.', 'Hoo-ray, keep going!'],
+      sleepy: ['It is getting late.', 'Wrap up soon?'],
+      happy: ['Great work today.', 'Go rest, you earned it.']
+    },
+    tap: {
+      idle: ['Hoo is that? Oh, it is you.', 'Tap tap. Logging in today?', 'I was just resting my eyes.', 'Hoot hoot!'],
+      working: ['Hoo-ray, keep going!', 'Eyes on the prize.', 'Sip some water.', 'I am watching, no pressure.'],
+      sleepy: ['Zzz... five more minutes.', 'It is late. Wrap up soon?', 'My eyes are closing...'],
+      happy: ['Great work today!', 'Go rest, you earned it.', 'Hoot hoot, see you tomorrow.']
+    },
+    dizzy: 'Whoa, easy! I am dizzy.'
+  };
+  var owlKey = '', owlMoodName = 'idle', owlSayTimer = null, lastPointer = 0, tapTimes = [];
+
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+  function owlSay(text) {
+    var b = $('bubble');
+    b.textContent = text;
+    b.classList.add('show');
+    clearTimeout(owlSayTimer);
+    owlSayTimer = setTimeout(function () { b.classList.remove('show'); }, 3800);
+  }
+
+  // Mood follows the day: awake, working, sleepy late at night, happy once done.
+  function owlUpdate(s, homeOpen) {
+    var h = new Date().getHours();
+    var mood = (s.state === 'done' && !homeOpen) ? 'happy'
+             : (s.state === 'in' && (h >= 22 || h < 5)) ? 'sleepy'
+             : (s.state === 'in' || homeOpen) ? 'working' : 'idle';
+    owlMoodName = mood;
+    $('owl').className = 'owl' + (mood === 'sleepy' ? ' sleepy' : mood === 'happy' ? ' happy' : '');
+    if (owlKey !== mood) { owlKey = mood; owlSay(pick(OWL.greet[mood])); }
+  }
+
+  function setPupils(x, y) {
+    var t = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
+    $('pl').style.transform = t;
+    $('pr').style.transform = t;
+  }
+
+  function lookAt(x, y) {
+    lastPointer = Date.now();
+    var r = $('owl').getBoundingClientRect();
+    var dx = x - (r.left + r.width / 2), dy = y - (r.top + r.height * 0.45);
+    var d = Math.hypot(dx, dy) || 1;
+    var k = Math.min(1, d / 140) * 4;
+    setPupils(dx / d * k, dy / d * k);
+  }
+
+  function owlTap() {
+    var now = Date.now();
+    tapTimes = tapTimes.filter(function (t) { return now - t < 2500; });
+    tapTimes.push(now);
+    buzz();
+    var g = $('owlg'), o = $('owl');
+    g.classList.remove('hop', 'flap', 'spin');
+    o.classList.remove('wow');
+    void g.getBoundingClientRect();
+    if (tapTimes.length >= 5) {
+      tapTimes = [];
+      g.classList.add('spin', 'flap');
+      owlSay(OWL.dizzy);
+    } else {
+      g.classList.add('hop', 'flap');
+      owlSay(pick(OWL.tap[owlMoodName]));
+    }
+    o.classList.add('wow');
+    setTimeout(function () { g.classList.remove('hop', 'flap', 'spin'); o.classList.remove('wow'); }, 950);
+  }
+
+  $('owl').addEventListener('click', owlTap);
+  $('owl').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); owlTap(); } });
+  document.addEventListener('pointermove', function (e) { if (signedIn) lookAt(e.clientX, e.clientY); }, { passive: true });
+  document.addEventListener('pointerdown', function (e) { if (signedIn) lookAt(e.clientX, e.clientY); }, { passive: true });
+  // When nobody is touching the screen, the owl glances around on its own.
+  setInterval(function () {
+    if (!signedIn || Date.now() - lastPointer < 3500 || $('owl').classList.contains('sleepy')) return;
+    setPupils((Math.random() - 0.5) * 8, (Math.random() - 0.3) * 5);
+  }, 3200);
+
   // ---------- Wire up ----------
   $('in').addEventListener('click', function () { act('login'); });
   $('out').addEventListener('click', function () { act('logout'); });
@@ -571,7 +828,8 @@
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) return;
     checkForUpdate();
-    if (signedIn && !busy && load(KEY_SESSION)) loadState();
+    if (signedIn && !busy && load(KEY_SESSION)) { loadState(); }
+    warmGeo();
   });
   setInterval(tick, 1000);
 
@@ -580,7 +838,20 @@
   }
 
   initGoogle();
-  if (load(KEY_SESSION)) loadState(); else view('signin');
+  if (load(KEY_SESSION)) {
+    // Show the last screen from today straight away while the fresh one loads. Buttons stay locked until it arrives.
+    var cached = null;
+    try { cached = JSON.parse(load(KEY_STATE) || 'null'); } catch (e) { cached = null; }
+    if (cached && cached.s && cached.d === new Date().toDateString()) {
+      stale = true;
+      view('main');
+      render(cached.s);
+      setMsg('Updating...', false);
+    }
+    loadState();
+  } else {
+    view('signin');
+  }
 </script>
 </body>
 </html>
